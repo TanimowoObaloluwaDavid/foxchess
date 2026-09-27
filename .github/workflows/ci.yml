@@ -1,0 +1,99 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint and types
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install "ruff>=0.8" "mypy>=1.13"
+      - name: Ruff
+        run: ruff check --output-format=github .
+      - name: Types
+        run: mypy
+
+  test:
+    name: Test on Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e ".[dev]"
+      - name: Test
+        run: pytest
+
+  # The slow set is the deep perft cases and the long searches. It runs on a
+  # schedule and on demand rather than on every push, because it is about
+  # sixteen minutes of pure-Python move generation.
+  slow:
+    name: Slow suite
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e ".[dev]"
+      - name: Deep perft and long searches
+        run: pytest -m slow
+
+  package:
+    name: Build and install the wheel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install --upgrade pip build
+      - run: python -m build
+      # Install the built wheel into a clean environment, so a missing file in
+      # the wheel (py.typed, say) shows up here rather than in someone's venv.
+      - name: Install the wheel with no dependencies available
+        run: |
+          python -m pip install dist/*.whl
+          python -m pip install pytest
+      - name: The wheel imports, types are marked, and the commands run
+        run: |
+          python -c "import foxchess; print(foxchess.__version__)"
+          python -c "import importlib.resources as r; assert (r.files('foxchess') / 'py.typed').is_file(), 'py.typed missing from the wheel'"
+          foxchess --version
+          foxchess fen e2e4
+          printf 'uci\nisready\nquit\n' | foxchess-uci
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/

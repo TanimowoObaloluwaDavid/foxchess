@@ -1,0 +1,17 @@
+# Normalise line endings on checkin so a Windows working copy and a Linux CI
+# checkout do not disagree about the same file. Without this, every clone on
+# Windows shows the whole tree as modified.
+* text=auto eol=lf
+
+# Files that are genuinely binary.
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.whl binary
+*.gz binary
+*.zip binary
+
+# Keep these exactly as written: they are read by tools that are fussy.
+*.bat  text eol=crlf
+*.cmd  text eol=crlf

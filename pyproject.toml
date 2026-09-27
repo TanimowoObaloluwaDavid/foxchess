@@ -1,0 +1,154 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "foxchess"
+version = "1.0.0"
+description = "A chess engine in pure Python: bitboard move generation, alpha-beta search, UCI protocol and a zero-dependency HTTP analysis API."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+authors = [{ name = "Tanimowo Obaloluwa", email = "113532607+TanimowoObaloluwaDavid@users.noreply.github.com" }]
+keywords = ["chess", "engine", "bitboard", "alpha-beta", "uci", "game-theory", "ai"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Games/Entertainment :: Board Games",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Typing :: Typed",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "pytest-cov>=6.0",
+  "ruff>=0.8",
+  "mypy>=1.13",
+  "chess>=1.11",
+  "pre-commit>=4.0",
+  "build>=1.2",
+]
+
+[project.scripts]
+foxchess = "foxchess.cli:main"
+foxchess-uci = "foxchess.uci:main"
+
+[project.urls]
+Homepage = "https://github.com/TanimowoObaloluwaDavid/foxchess"
+Repository = "https://github.com/TanimowoObaloluwaDavid/foxchess"
+Issues = "https://github.com/TanimowoObaloluwaDavid/foxchess/issues"
+Changelog = "https://github.com/TanimowoObaloluwaDavid/foxchess/blob/main/CHANGELOG.md"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/foxchess"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/foxchess", "tests", "tools", "README.md", "ARCHITECTURE.md", "CHANGELOG.md", "LICENSE"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+# The deep perft cases are deselected by default: they are ~10.5 million nodes
+# and about nine minutes of pure-Python move generation. A command-line `-m`
+# overrides the `-m` here, so `pytest -m slow` still runs just the slow set.
+addopts = ["-ra", "--strict-markers", "--strict-config", "-m", "not slow"]
+markers = [
+  "slow: exhaustive perft / long search tests (run with 'pytest -m slow')",
+  "differential: cross-checks move generation against python-chess",
+]
+filterwarnings = ["error"]
+
+[tool.coverage.run]
+branch = true
+source = ["src/foxchess"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+exclude_lines = [
+  "pragma: no cover",
+  "if TYPE_CHECKING:",
+  "raise NotImplementedError",
+  "\\.\\.\\.",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+  "E", "W",    # pycodestyle
+  "F",         # pyflakes
+  "I",         # isort
+  "N",         # pep8-naming
+  "UP",        # pyupgrade
+  "B",         # bugbear
+  "A",         # builtins shadowing
+  "C4",        # comprehensions
+  "SIM",       # simplify
+  "RET",       # returns
+  "PTH",       # pathlib
+  "ARG",       # unused arguments
+  "PL",        # pylint subset
+  "RUF",
+  "TID",
+]
+ignore = [
+  "PLR0911", # too many return statements
+  "PLR0912", # too many branches
+  "PLR0913", # too many arguments
+  "PLR0915", # too many statements
+  "PLR2004", # magic value comparison
+  "B008",    # function call in default argument
+  "SIM108",  # ternary rewrite
+  "RET504",  # unnecessary assignment before return
+  "PLR0917", # too many positional args
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Test files import inside test bodies on purpose: the module under test is
+# usually one of the things being checked, and a top-level import would hide a
+# broken package from a test that only meant to exercise a helper.
+"tests/**" = [
+  "ARG001",   # fixtures named for clarity even when a test does not use them
+  "ARG002",   # overriding a method to satisfy a signature
+  "PLR2004",  # magic values are the point in a test
+  "PLR6301",  # self is not always used
+  "S101",     # assert
+  "PLC0415",  # local imports, see above
+]
+# `conftest.py` has to put `src` on the path before it can import the package.
+"tests/conftest.py" = ["E402", "PLC0415"]
+# `serve` pulls in http.server, which a caller who only wants the CLI has no use
+# for. Keeping the import inside the subcommand means `import foxchess.cli` does
+# not load the web stack.
+"src/foxchess/cli.py" = ["PLR0912", "PLR0915", "PLC0415"]
+"src/foxchess/perft.py" = ["PLC0415"]
+# `SearchStopped` is caught inside the search and never escapes `search()`. It
+# is exported because a caller driving a Searcher may want to catch it, and
+# renaming a published name to satisfy a convention is worse than the convention.
+"src/foxchess/search.py" = ["PLR0912", "PLR0915", "C901", "N818"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["foxchess"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unreachable = true
+disallow_any_generics = true
+disallow_untyped_defs = true
+no_implicit_reexport = false
+files = ["src/foxchess"]
+
+[[tool.mypy.overrides]]
+module = ["chess.*"]
+ignore_missing_imports = true
