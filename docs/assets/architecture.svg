@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 690" width="1000" height="690"
+     role="img" aria-labelledby="title desc">
+  <title id="title">foxchess module layout</title>
+  <desc id="desc">foxchess entry points at the top, the board representation and move generation in the
+  middle, search and evaluation on the right, and the supporting tables along the bottom.
+  Nothing outside the standard library.</desc>
+
+  <style>
+    .bg   { fill: #1f2228; }
+    .lane { fill: none; stroke: #383c44; stroke-width: 1; }
+    .box  { fill: #2b2f37; stroke: #4a4f59; stroke-width: 1.5; }
+    .box-emphasis { fill: #2f3540; stroke: #6db2e0; stroke-width: 1.8; }
+    .box-data     { fill: #2b2f37; stroke: #7ec88c; stroke-width: 1.5; }
+    .t   { font: 15px "Segoe UI", "Helvetica Neue", Arial, sans-serif; fill: #eceef2; }
+    .t-s { font: 12px "Segoe UI", "Helvetica Neue", Arial, sans-serif; fill: #8a929e; }
+    .t-h { font: 600 17px "Segoe UI", "Helvetica Neue", Arial, sans-serif; fill: #eceef2; }
+    .edge  { fill: none; stroke: #6b7280; stroke-width: 1.4; marker-end: url(#arrow); }
+    .edge-emphasis { fill: none; stroke: #6db2e0; stroke-width: 1.6; marker-end: url(#arrow-hot); }
+    .note { font: italic 13px "Segoe UI", "Helvetica Neue", Arial, sans-serif; fill: #8a929e; }
+  </style>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6b7280"/>
+    </marker>
+    <marker id="arrow-hot" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6db2e0"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1000" height="690" rx="10"/>
+
+  <text class="t-h" x="32" y="40">foxchess</text>
+  <text class="note" x="132" y="40">pure Python, no runtime dependencies</text>
+
+  <!-- Entry points -->
+  <text class="t-s" x="32" y="76">ENTRY POINTS</text>
+  <rect class="box-emphasis" x="32" y="88" width="196" height="52" rx="7"/>
+  <text class="t" x="46" y="112">cli.py</text>
+  <text class="t-s" x="46" y="130">foxchess</text>
+
+  <rect class="box-emphasis" x="244" y="88" width="196" height="52" rx="7"/>
+  <text class="t" x="258" y="112">uci.py</text>
+  <text class="t-s" x="258" y="130">foxchess-uci</text>
+
+  <rect class="box-emphasis" x="456" y="88" width="196" height="52" rx="7"/>
+  <text class="t" x="470" y="112">api.py</text>
+  <text class="t-s" x="470" y="130">library surface</text>
+
+  <rect class="box" x="668" y="88" width="300" height="52" rx="7"/>
+  <text class="t" x="682" y="112">perft.py</text>
+  <text class="t-s" x="682" y="130">correctness harness, not on the search path</text>
+
+  <!-- Representation and move generation -->
+  <text class="t-s" x="32" y="196">REPRESENTATION</text>
+  <rect class="box-emphasis" x="32" y="208" width="264" height="58" rx="7"/>
+  <text class="t" x="46" y="232">board.py</text>
+  <text class="t-s" x="46" y="251">mailbox + bitboards, FEN</text>
+
+  <rect class="box" x="32" y="286" width="264" height="58" rx="7"/>
+  <text class="t" x="46" y="310">types.py</text>
+  <text class="t-s" x="46" y="329">squares, pieces, colours, a1-first</text>
+
+  <rect class="box" x="32" y="364" width="264" height="58" rx="7"/>
+  <text class="t" x="46" y="388">move.py</text>
+  <text class="t-s" x="46" y="407">a move is one packed int</text>
+
+  <rect class="box-emphasis" x="32" y="442" width="264" height="58" rx="7"/>
+  <text class="t" x="46" y="466">attacks.py</text>
+  <text class="t-s" x="46" y="485">sliding rays, pins, check</text>
+
+  <!-- Search and evaluation -->
+  <text class="t-s" x="380" y="196">SEARCH AND EVALUATION</text>
+  <rect class="box-emphasis" x="380" y="208" width="288" height="58" rx="7"/>
+  <text class="t" x="394" y="232">search.py</text>
+  <text class="t-s" x="394" y="251">alpha-beta, quiescence, ordering</text>
+
+  <rect class="box" x="380" y="286" width="288" height="58" rx="7"/>
+  <text class="t" x="394" y="310">evaluate.py</text>
+  <text class="t-s" x="394" y="329">material, game phase, piece placement</text>
+
+  <rect class="box" x="380" y="364" width="288" height="58" rx="7"/>
+  <text class="t" x="394" y="388">notation.py</text>
+  <text class="t-s" x="394" y="407">SAN, UCI, FEN round-trips</text>
+
+  <!-- Supporting tables -->
+  <text class="t-s" x="752" y="196">TABLES</text>
+  <rect class="box-data" x="752" y="208" width="216" height="58" rx="7"/>
+  <text class="t" x="766" y="232">zobrist.py</text>
+  <text class="t-s" x="766" y="251">12 pieces x 64 squares, plus rights</text>
+
+  <rect class="box-data" x="752" y="286" width="216" height="58" rx="7"/>
+  <text class="t" x="766" y="310">tt.py</text>
+  <text class="t-s" x="766" y="329">transposition table</text>
+
+  <path class="edge-emphasis" d="M 130 140 L 130 208"/>
+  <path class="edge-emphasis" d="M 342 114 L 380 232"/>
+  <path class="edge" d="M 550 114 L 550 208"/>
+  <path class="edge-emphasis" d="M 164 266 L 164 286"/>
+  <path class="edge" d="M 296 316 L 380 237"/>
+  <path class="edge-emphasis" d="M 164 344 L 164 364"/>
+  <path class="edge-emphasis" d="M 164 422 L 164 442"/>
+  <path class="edge-emphasis" d="M 296 471 L 380 330"/>
+  <path class="edge" d="M 340 393 L 380 393"/>
+  <path class="edge" d="M 524 266 L 524 286"/>
+  <path class="edge-emphasis" d="M 664 237 L 752 237"/>
+  <path class="edge-emphasis" d="M 664 330 L 752 315"/>
+  <path class="lane" d="M 296 315 L 720 315 L 720 243 L 752 243"/>
+
+  <!-- Testing banner -->
+  <rect class="box" x="32" y="536" width="936" height="54" rx="7"/>
+  <text class="t" x="46" y="560">tests/</text>
+  <text class="t-s" x="46" y="579">perft cross-checked against published counts; a random-play differential test
+  against python-chess in the slow suite</text>
+
+  <text class="note" x="32" y="632">Search never trusts a move generator: pseudo-legal moves are generated wide, then verified,
+  so a bug in attack detection can cost speed but cannot return an illegal move.</text>
+  <text class="note" x="32" y="654">The slow suite is not optional: perft against published counts, and a random-play
+  differential test against python-chess.</text>
+</svg>

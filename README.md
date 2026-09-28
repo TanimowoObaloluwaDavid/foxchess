@@ -13,6 +13,52 @@ print(result.pv_uci())          # ['g1f3', 'b8c6', 'b1c3', 'g8f6']
 print(result.score)              # 10
 ```
 
+## See it work
+
+Everything below is generated from the engine in this repository by
+`tools/generate_media.py`, not recorded by hand or drawn to flatter it.
+
+**The engine playing itself** — every move chosen by a real depth-4 search:
+
+<video src="docs/assets/selfplay.mp4" width="640" controls muted loop autoplay></video>
+
+<details>
+<summary>As a GIF, if you would rather not load video</summary>
+<img src="docs/assets/selfplay.gif" width="640" alt="foxchess playing itself, move by move, with an evaluation after each move">
+</details>
+
+**One search, in full** — the score trace and principal variation are read from
+the engine's own UCI output. On this position it swings from roughly equal to
+finding a forced mate in five at depth four:
+
+<video src="docs/assets/search.mp4" width="640" controls muted loop autoplay></video>
+
+<details>
+<summary>As a GIF</summary>
+<img src="docs/assets/search.gif" width="640" alt="A search animated depth by depth, with the score by depth drawn as a trace and the principal variation shown on the board">
+</details>
+
+**Move generation and evaluation**, drawn the same way:
+
+<p>
+  <img src="docs/assets/board-startpos.png" width="180" alt="The starting position, with rank 1 at the bottom and file a on the left">
+  <img src="docs/assets/board-kiwipete.png" width="180" alt="Kiwipete, the position used for perft testing, with a white rook on f7, a black king on e8, white castling rights and black castling rights">
+  <img src="docs/assets/board-en-passant.png" width="180" alt="A position where an en passant capture is available to a white pawn on b5">
+  <img src="docs/assets/board-stalemate.png" width="180" alt="A stalemate: a black king on h8 with a white queen on f7 and a white king on g6, where black has no legal move but is not in check">
+</p>
+
+**Perft** — the leaf counts the engine reproduces, which is how the move
+generator is held to an external answer rather than to itself:
+
+![Perft leaf nodes by depth, on a log scale, for six standard test positions](docs/assets/chart-perft.png)
+
+**Search throughput**, measured on the machine that generated the file:
+
+![Search throughput by depth on Kiwipete, as node counts per second](docs/assets/chart-nps.png)
+
+**How the code is arranged:** see [ARCHITECTURE.md](ARCHITECTURE.md) for the
+reasoning, or the [module map](docs/assets/architecture.svg) for the shape of it.
+
 ## Why it exists
 
 Most chess libraries are either a binding to a fast engine written in C
@@ -201,6 +247,23 @@ The `differential` marker selects the `python-chess` comparison tests:
 
 `tools/perft_check.py` and `tools/_smoke.py` are the same checks in a form you
 can point at a position by hand.
+
+### Regenerating the media
+
+The images and videos at the top of this file are built by
+`tools/generate_media.py`, which is a maintainer tool and not part of the
+package. It is the only thing that needs a dependency:
+
+```console
+$ pip install -e '.[media]'      # Pillow; ffmpeg must be on the PATH
+$ python tools/generate_media.py all
+```
+
+It refuses to draw a board with a font that has no chess glyphs, and it takes its
+perft counts from `tests/conftest.py` rather than restating them, so the chart
+cannot drift from the numbers the slow suite asserts. Regenerating on a slower
+machine will change the throughput chart, which is why that one says which
+machine drew it.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for how the pieces fit together and
 [CHANGELOG.md](CHANGELOG.md) for what changed.

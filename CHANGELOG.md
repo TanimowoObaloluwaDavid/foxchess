@@ -5,6 +5,36 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 this project uses [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+**Documentation media** — generated from the engine by
+`tools/generate_media.py`, embedded in the README:
+
+- `selfplay` MP4 and GIF: a real game in which every move is chosen by a
+  depth-4 search, with an evaluation after each move.
+- `search` MP4 and GIF: one search animated depth by depth, its score trace read
+  from the engine's own UCI `info` lines.
+- Perft and throughput charts, and four board illustrations.
+- An architecture SVG summarising the module layout.
+- A `media` optional dependency group (Pillow), used only by the generator.
+
+### Fixed
+
+**`tools/generate_media.py`**
+
+- Chess glyphs are now keyed by `(colour, piece type)`. Indexing them off a
+  positional run drew the wrong piece on every square, because `PieceType` is
+  ordered pawn-first and the Unicode block is ordered king-first.
+- The perft chart takes its counts from `tests/conftest.py` instead of a
+  restated copy, two entries of which were wrong.
+- Every video frame is the same size. Mixing frame sizes would have failed
+  encoding.
+- The encoder takes a name, so the search video no longer overwrites the
+  self-play one.
+- Board images show the real starting position rather than an empty board.
+
 ## [1.0.0] - 2026-09-28
 
 First release.
